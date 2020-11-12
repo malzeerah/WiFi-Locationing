@@ -1,0 +1,107 @@
+## THIS FOLLOWING IS A WORK IN PROGRESS ## 
+
+####################
+## Load Packages ## 
+####################
+library(readr)
+library(caret)
+library(C50)
+library(doMC)
+library(tidyr)
+
+## Import data
+RAWdata <- read.csv("trainingData.csv")
+
+detectCores()  #4 cores
+
+####################
+## Pre-processing ## 
+####################
+
+# Verify data type
+str(RAWdata)
+str(RAWdata[,1:9])
+summary(RAWdata[,1:9])
+
+# Missing values? 
+is.na(RAWdata) #false
+
+
+
+#########################
+## Feature Engineering ## 
+#########################
+
+## -- option 1 -- ##
+## Loc_UID contains 735 levels
+
+# Combine BUILDINGID, FLOOR, SPACEID 
+FEdata <- unite(RAWdata, "Loc_UID", remove = TRUE, sep = ".", c("BUILDINGID","FLOOR", "SPACEID"))
+
+# Convert Loc_UID to factor 
+FEdata$Loc_UID <- as.factor(FEdata$Loc_UID)
+
+# verify UID data type
+str(FEdata[,1:9])
+
+# Remove unneccasry columns
+FEdata = subset(FEdata, select = -c(LONGITUDE,LATITUDE,RELATIVEPOSITION,USERID,PHONEID,TIMESTAMP) )
+
+## -- option 2 -- ##
+## Loc_UID2 contains 933 levels
+
+# Combine LONGITUDE, LATITUDE, Floor 
+FEdata2 <- unite(RAWdata, "Loc_UID2", remove = TRUE, sep = ".", c("LONGITUDE","LATITUDE", "FLOOR"))
+
+# Convert Loc_UID2 to factor 
+FEdata2$Loc_UID2 <- as.factor(FEdata2$Loc_UID2)
+
+# verify data type
+str(FEdata2[,1:9])
+
+# Remove unneccasry columns
+FEdata2 = subset(FEdata2, select = -c(BUILDINGID,SPACEID,RELATIVEPOSITION,USERID,PHONEID,TIMESTAMP) )
+
+## option 2 [Loc_UID2] has more levels (more precision) and we will use it instead of option 1. 
+
+###############
+## Modeling ## 
+###############
+
+# TTS 1 Y Value = BUILDINGID
+set.seed(123)
+trainSize<-round(nrow(FEdata2)*0.7) 
+testSize<-nrow(FEdata2)-trainSize
+trainSize # 13956
+testSize # 5981
+training_indices<-sample(seq_len(nrow(FEdata2)),size =trainSize)
+trainSet<-FEdata2[training_indices,]
+testSet<-FEdata2[-training_indices,] 
+
+#10 fold cross validation
+fitControl <- trainControl(method = "repeatedcv", number = 10, repeats = 1)
+
+#train Random Forest Regression model with a tuneLenght = 1 (trains with 1 mtry value for RandomForest)
+rfFitBuild <- train(Loc_UID2~., data = trainSet, method = "rf", trControl=fitControl, tuneLength = 1)
+
+#training results
+rfFitBuild
+
+# %%%%%%%%%%%%  Predict Model 1 RF %%%%%%%%%%%% 
+
+rfPred <- predict(rfFitBuild, newdata = testSet)
+#To see the initial row of the predicited data
+head(rfPred)
+summary(rfFitBuild)
+
+#To determine how the model prioritized each feature
+varImp(rfFitBuild)
+
+rfClasses_i <- predict(rfFitBuild, newdata = testSet)
+str(rfClasses_i)
+
+postResample(rfPred, testSet$BUILDINGID)
+summary(rfPred)
+plot(rfPred)
+
+
