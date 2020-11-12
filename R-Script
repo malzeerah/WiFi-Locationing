@@ -8,11 +8,13 @@ library(caret)
 library(C50)
 library(doMC)
 library(tidyr)
+library(RMariaDB)
 
 ## Import data
 RAWdata <- read.csv("trainingData.csv")
 
 detectCores()  #4 cores
+registerDoMC(cores = 4)
 
 ####################
 ## Pre-processing ## 
@@ -26,13 +28,19 @@ summary(RAWdata[,1:9])
 # Missing values? 
 is.na(RAWdata) #false
 
+# Identify columns with no variance using nearZeroVar()  
+nzvMetrics <- nearZeroVar(RAWdata, saveMetrics = TRUE)
+nzvMetrics
+
+# remove columns with no variance using nearZeroVar()  
+RAWdata = subset(RAWdata, select = -c(WAP003,WAP004,WAP092,WAP093,WAP094,WAP095,WAP152,WAP158,WAP159,WAP160,WAP215,WAP217,WAP226,WAP227,WAP238,WAP239,WAP240,WAP241) )
 
 
 #########################
 ## Feature Engineering ## 
 #########################
 
-## -- option 1 -- ##
+## ----- option 1 ----- ##
 ## Loc_UID contains 735 levels
 
 # Combine BUILDINGID, FLOOR, SPACEID 
@@ -47,7 +55,7 @@ str(FEdata[,1:9])
 # Remove unneccasry columns
 FEdata = subset(FEdata, select = -c(LONGITUDE,LATITUDE,RELATIVEPOSITION,USERID,PHONEID,TIMESTAMP) )
 
-## -- option 2 -- ##
+## ----- option 2  ----- ##
 ## Loc_UID2 contains 933 levels
 
 # Combine LONGITUDE, LATITUDE, Floor 
@@ -82,7 +90,7 @@ testSet<-FEdata2[-training_indices,]
 fitControl <- trainControl(method = "repeatedcv", number = 10, repeats = 1)
 
 #train Random Forest Regression model with a tuneLenght = 1 (trains with 1 mtry value for RandomForest)
-rfFitBuild <- train(Loc_UID2~., data = trainSet, method = "rf", trControl=fitControl, tuneLength = 1)
+system.time(rfFitBuild <- train(Loc_UID2~., data = trainSet, method = "rf", trControl=fitControl, tuneLength = 1))
 
 #training results
 rfFitBuild
