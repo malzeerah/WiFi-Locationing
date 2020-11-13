@@ -6,15 +6,25 @@
 library(readr)
 library(caret)
 library(C50)
-library(doMC)
+library(doParallel)
 library(tidyr)
 library(RMariaDB)
 
 ## Import data
 RAWdata <- read.csv("trainingData.csv")
 
-detectCores()  #4 cores
-registerDoMC(cores = 4)
+
+# Find how many cores are on your machine
+detectCores() # Result = 4
+# Create Cluster with desired number of cores. Don't use them all! Your computer is running other processes. 
+cl <- makeCluster(2)
+# Register Cluster
+registerDoParallel(cl)
+# Confirm how many cores are now "assigned" to R and RStudio
+getDoParWorkers() # Result 2 
+# Stop Cluster. After performing your tasks, stop your cluster. 
+stopCluster(cl)
+
 
 ####################
 ## Pre-processing ## 
@@ -76,7 +86,7 @@ FEdata2 = subset(FEdata2, select = -c(BUILDINGID,SPACEID,RELATIVEPOSITION,USERID
 ## Modeling ## 
 ###############
 
-# TTS 1 Y Value = BUILDINGID
+# TTS 1 Y Value = Loc_UID2
 set.seed(123)
 trainSize<-round(nrow(FEdata2)*0.7) 
 testSize<-nrow(FEdata2)-trainSize
@@ -91,9 +101,11 @@ fitControl <- trainControl(method = "repeatedcv", number = 10, repeats = 1)
 
 #train Random Forest Regression model with a tuneLenght = 1 (trains with 1 mtry value for RandomForest)
 system.time(rfFitBuild <- train(Loc_UID2~., data = trainSet, method = "rf", trControl=fitControl, tuneLength = 1))
+# Run time 2.7 hours
 
 #training results
 rfFitBuild
+
 
 # %%%%%%%%%%%%  Predict Model 1 RF %%%%%%%%%%%% 
 
@@ -103,12 +115,58 @@ head(rfPred)
 summary(rfFitBuild)
 
 #To determine how the model prioritized each feature
-varImp(rfFitBuild)
+varImp(rfFitBuild) # most important -- [WAP501]
 
 rfClasses_i <- predict(rfFitBuild, newdata = testSet)
 str(rfClasses_i)
 
-postResample(rfPred, testSet$BUILDINGID)
+postResample(rfPred, testSet$Loc_UID2)
+# Accuracy     Kappa 
+# 0.7965223   0.7962457
+summary(rfPred)
+plot(rfPred)
+
+###############
+## Modeling ## 
+###############
+
+# TTS 2 Y Value = Loc_UID2
+set.seed(123)
+trainSize<-round(nrow(FEdata2)*0.7) 
+testSize<-nrow(FEdata2)-trainSize
+trainSize # 13956
+testSize # 5981
+training_indices<-sample(seq_len(nrow(FEdata2)),size =trainSize)
+trainSet<-FEdata2[training_indices,]
+testSet<-FEdata2[-training_indices,] 
+
+#10 fold cross validation
+fitControl <- trainControl(method = "repeatedcv", number = 10, repeats = 1)
+
+#train Random Forest Regression model with a tuneLenght = 1 (trains with 1 mtry value for RandomForest)
+system.time(rfFitBuild <- train(Loc_UID2~., data = trainSet, method = "rf", trControl=fitControl, tuneLength = 1))
+# Run time 
+
+#training results
+rfFitBuild
+
+
+# %%%%%%%%%%%%  Predict Model 2 RF %%%%%%%%%%%% 
+
+rfPred <- predict(rfFitBuild, newdata = testSet)
+#To see the initial row of the predicited data
+head(rfPred)
+summary(rfFitBuild)
+
+#To determine how the model prioritized each feature
+varImp(rfFitBuild) # most important -- [WAP501]
+
+rfClasses_i <- predict(rfFitBuild, newdata = testSet)
+str(rfClasses_i)
+
+postResample(rfPred, testSet$Loc_UID2)
+# Accuracy     Kappa 
+
 summary(rfPred)
 plot(rfPred)
 
