@@ -1,4 +1,4 @@
-## THE FOLLOWING IS A WORK IN PROGRESS ## 
+## The FOLLOWING IS A WORK IN PROGRESS ## 
 
 ####################
 ## Load Packages ## 
@@ -9,6 +9,8 @@ library(C50)
 library(doParallel)
 library(tidyr)
 library(RMariaDB)
+library(RMySQL)
+library(ggplot2)
 
 ## Import data
 RAWdata <- read.csv("trainingData.csv")
@@ -31,12 +33,15 @@ stopCluster(cl)
 ####################
 
 # Verify data type
-str(RAWdata)
+str(RAWdata) #19937 observations
 str(RAWdata[,1:9])
-summary(RAWdata[,1:9])
+summary(RAWdata[,1:9]) 
 
 # Missing values? 
 is.na(RAWdata) #false
+
+# Basic histogram buildings
+ggplot(RAWdata, aes(x=BUILDINGID)) + geom_histogram()
 
 # Identify columns with no variance using nearZeroVar()  
 nzvMetrics <- nearZeroVar(RAWdata, saveMetrics = TRUE)
@@ -50,35 +55,62 @@ RAWdata = subset(RAWdata, select = -c(WAP003,WAP004,WAP092,WAP093,WAP094,WAP095,
 ## Feature Engineering ## 
 #########################
 
+# Group dataset by building number
+FEdata.BLD1 <- FEdata[FEdata$BUILDINGID == 0, ]
+FEdata.BLD2 <- FEdata[FEdata$BUILDINGID == 1, ]
+FEdata.BLD3 <- FEdata[FEdata$BUILDINGID == 2, ]
+
+
 ## ----- option 1 ----- ##
 ## Loc_UID contains 735 levels
 
 # Combine BUILDINGID, FLOOR, SPACEID 
 FEdata <- unite(RAWdata, "Loc_UID", remove = TRUE, sep = ".", c("BUILDINGID","FLOOR", "SPACEID"))
+Location1_Bld1 <- unite(FEdata.BLD1, "Loc_UID", remove = TRUE, sep = ".", c("BUILDINGID","FLOOR", "SPACEID"))
+Location1_Bld2 <- unite(FEdata.BLD2, "Loc_UID", remove = TRUE, sep = ".", c("BUILDINGID","FLOOR", "SPACEID"))
+Location1_Bld3 <- unite(FEdata.BLD3, "Loc_UID", remove = TRUE, sep = ".", c("BUILDINGID","FLOOR", "SPACEID"))
 
 # Convert Loc_UID to factor 
 FEdata$Loc_UID <- as.factor(FEdata$Loc_UID)
+Location1_Bld1$Loc_UID <- as.factor(Location1_Bld1$Loc_UID)
+Location1_Bld2$Loc_UID <- as.factor(Location1_Bld2$Loc_UID)
+Location1_Bld3$Loc_UID <- as.factor(Location1_Bld3$Loc_UID)
 
 # verify UID data type
 str(FEdata[,1:9])
 
+
 # Remove unneccasry columns
 FEdata = subset(FEdata, select = -c(LONGITUDE,LATITUDE,RELATIVEPOSITION,USERID,PHONEID,TIMESTAMP) )
+Location1_Bld1 = subset(Location1_Bld1, select = -c(LONGITUDE,LATITUDE,RELATIVEPOSITION,USERID,PHONEID,TIMESTAMP) )
+Location1_Bld2 = subset(Location1_Bld2, select = -c(LONGITUDE,LATITUDE,RELATIVEPOSITION,USERID,PHONEID,TIMESTAMP) )
+Location1_Bld3 = subset(Location1_Bld3, select = -c(LONGITUDE,LATITUDE,RELATIVEPOSITION,USERID,PHONEID,TIMESTAMP) )
+
 
 ## ----- option 2  ----- ##
 ## Loc_UID2 contains 933 levels
 
 # Combine LONGITUDE, LATITUDE, Floor 
 FEdata2 <- unite(RAWdata, "Loc_UID2", remove = TRUE, sep = ".", c("LONGITUDE","LATITUDE", "FLOOR"))
+Location2_Bld1 <- unite(FEdata.BLD1, "Loc_UID2", remove = TRUE, sep = ".", c("LONGITUDE","LATITUDE", "FLOOR"))
+Location2_Bld2 <- unite(FEdata.BLD2, "Loc_UID2", remove = TRUE, sep = ".", c("LONGITUDE","LATITUDE", "FLOOR"))
+Location2_Bld3 <- unite(FEdata.BLD3, "Loc_UID2", remove = TRUE, sep = ".", c("LONGITUDE","LATITUDE", "FLOOR"))
 
 # Convert Loc_UID2 to factor 
 FEdata2$Loc_UID2 <- as.factor(FEdata2$Loc_UID2)
+Location2_Bld1$Loc_UID2 <- as.factor(Location2_Bld1$Loc_UID2)
+Location2_Bld2$Loc_UID2 <- as.factor(Location2_Bld2$Loc_UID2)
+Location2_Bld3$Loc_UID2 <- as.factor(Location2_Bld3$Loc_UID2)
 
 # verify data type
 str(FEdata2[,1:9])
 
 # Remove unneccasry columns
 FEdata2 = subset(FEdata2, select = -c(BUILDINGID,SPACEID,RELATIVEPOSITION,USERID,PHONEID,TIMESTAMP) )
+Location2_Bld1 = subset(Location2_Bld1, select = -c(BUILDINGID,SPACEID,RELATIVEPOSITION,USERID,PHONEID,TIMESTAMP) )
+Location2_Bld2 = subset(Location2_Bld2, select = -c(BUILDINGID,SPACEID,RELATIVEPOSITION,USERID,PHONEID,TIMESTAMP) )
+Location2_Bld3 = subset(Location2_Bld3, select = -c(BUILDINGID,SPACEID,RELATIVEPOSITION,USERID,PHONEID,TIMESTAMP) )
+
 
 ## option 2 [Loc_UID2] has more levels (more precision) and we will use it instead of option 1. 
 
