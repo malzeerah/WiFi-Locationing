@@ -25,7 +25,7 @@ registerDoParallel(cl)
 # Confirm how many cores are now "assigned" to R and RStudio
 getDoParWorkers() # Result 2 
 # Stop Cluster. After performing your tasks, stop your cluster. 
-stopCluster(cl)
+#stopCluster(cl)
 
 
 ####################
@@ -159,7 +159,7 @@ summary(rfPred)
 plot(rfPred)
 
 ###############
-## Modeling ## 
+## Modeling 2 ## 
 ###############
 
 # TTS 2 Y Value = Loc_UID2
@@ -178,6 +178,7 @@ fitControl <- trainControl(method = "repeatedcv", number = 10, repeats = 1)
 #train Random Forest Regression model with a tuneLenght = 1 (trains with 1 mtry value for RandomForest)
 system.time(rfFitBld1 <- train(Loc_UID2~., data = trainSet, method = "rf", trControl=fitControl, tuneLength = 1))
 # Run time 
+# Accuracy     Kappa 
 
 #training results
 rfFitBld1
