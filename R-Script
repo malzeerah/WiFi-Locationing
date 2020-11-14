@@ -56,9 +56,9 @@ RAWdata = subset(RAWdata, select = -c(WAP003,WAP004,WAP092,WAP093,WAP094,WAP095,
 #########################
 
 # Group dataset by building number
-FEdata.BLD1 <- FEdata[FEdata$BUILDINGID == 0, ]
-FEdata.BLD2 <- FEdata[FEdata$BUILDINGID == 1, ]
-FEdata.BLD3 <- FEdata[FEdata$BUILDINGID == 2, ]
+FEdata.BLD1 <- RAWdata[RAWdata$BUILDINGID == 0, ]
+FEdata.BLD2 <- RAWdata[RAWdata$BUILDINGID == 1, ]
+FEdata.BLD3 <- RAWdata[RAWdata$BUILDINGID == 2, ]
 
 
 ## ----- option 1 ----- ##
@@ -164,42 +164,40 @@ plot(rfPred)
 
 # TTS 2 Y Value = Loc_UID2
 set.seed(123)
-trainSize<-round(nrow(FEdata2)*0.7) 
-testSize<-nrow(FEdata2)-trainSize
+trainSize<-round(nrow(Location2_Bld1)*0.8) 
+testSize<-nrow(Location2_Bld1)-trainSize
 trainSize # 13956
 testSize # 5981
-training_indices<-sample(seq_len(nrow(FEdata2)),size =trainSize)
-trainSet<-FEdata2[training_indices,]
-testSet<-FEdata2[-training_indices,] 
+training_indices<-sample(seq_len(nrow(Location2_Bld1)),size =trainSize)
+trainSet<-Location2_Bld1[training_indices,]
+testSet<-Location2_Bld1[-training_indices,] 
 
 #10 fold cross validation
 fitControl <- trainControl(method = "repeatedcv", number = 10, repeats = 1)
 
 #train Random Forest Regression model with a tuneLenght = 1 (trains with 1 mtry value for RandomForest)
-system.time(rfFitBuild <- train(Loc_UID2~., data = trainSet, method = "rf", trControl=fitControl, tuneLength = 1))
+system.time(rfFitBld1 <- train(Loc_UID2~., data = trainSet, method = "rf", trControl=fitControl, tuneLength = 1))
 # Run time 
 
 #training results
-rfFitBuild
+rfFitBld1
 
 
 # %%%%%%%%%%%%  Predict Model 2 RF %%%%%%%%%%%% 
 
-rfPred <- predict(rfFitBuild, newdata = testSet)
+rfPredBLD1 <- predict(rfFitBld1, newdata = testSet)
 #To see the initial row of the predicited data
-head(rfPred)
-summary(rfFitBuild)
+head(rfPredBLD1)
+summary(rfFitBld1)
 
 #To determine how the model prioritized each feature
-varImp(rfFitBuild) # most important -- [WAP501]
+varImp(rfFitBld1) # most important -- [WAP501]
 
-rfClasses_i <- predict(rfFitBuild, newdata = testSet)
-str(rfClasses_i)
+rfClassesBLD1 <- predict(rfFitBld1, newdata = testSet)
+str(rfClassesBLD1)
 
-postResample(rfPred, testSet$Loc_UID2)
+postResample(rfPredBLD1, testSet$Loc_UID2)
 # Accuracy     Kappa 
 
-summary(rfPred)
-plot(rfPred)
-
-
+summary(rfPredBLD1)
+plot(rfPredBLD1)
