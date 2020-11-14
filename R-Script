@@ -177,8 +177,10 @@ fitControl <- trainControl(method = "repeatedcv", number = 10, repeats = 1)
 
 #train Random Forest Regression model with a tuneLenght = 1 (trains with 1 mtry value for RandomForest)
 system.time(rfFitBld1 <- train(Loc_UID2~., data = trainSet, method = "rf", trControl=fitControl, tuneLength = 1))
-# Run time 
+# Run time: 17 minutes
+
 # Accuracy     Kappa 
+# 0.7677928  0.7667815
 
 #training results
 rfFitBld1
