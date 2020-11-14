@@ -201,6 +201,6 @@ str(rfClassesBLD1)
 
 postResample(rfPredBLD1, testSet$Loc_UID2)
 # Accuracy     Kappa 
-
+# 0.7704762 0.7694471 
 summary(rfPredBLD1)
 plot(rfPredBLD1)
