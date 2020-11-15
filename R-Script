@@ -118,6 +118,8 @@ Location2_Bld3 = subset(Location2_Bld3, select = -c(BUILDINGID,SPACEID,RELATIVEP
 ## Modeling ## 
 ###############
 
+# --- All 3 building RF -- #
+
 # TTS 1 Y Value = Loc_UID2
 set.seed(123)
 trainSize<-round(nrow(FEdata2)*0.7) 
@@ -158,9 +160,7 @@ postResample(rfPred, testSet$Loc_UID2)
 summary(rfPred)
 plot(rfPred)
 
-###############
-## Modeling 2 ## 
-###############
+# --- Buildingn 1 RF -- #
 
 # TTS 2 Y Value = Loc_UID2
 set.seed(123)
@@ -204,3 +204,95 @@ postResample(rfPredBLD1, testSet$Loc_UID2)
 # 0.7704762 0.7694471 
 summary(rfPredBLD1)
 plot(rfPredBLD1)
+
+
+# --- Building 2 RF -- #
+
+# TTS 2 Y Value = Loc_UID2
+set.seed(123)
+trainSize<-round(nrow(Location2_Bld2)*0.8) 
+testSize<-nrow(Location2_Bld2)-trainSize
+trainSize # 4157
+testSize # 1039
+training_indices<-sample(seq_len(nrow(Location2_Bld2)),size =trainSize)
+trainSet<-Location2_Bld2[training_indices,]
+testSet<-Location2_Bld2[-training_indices,] 
+
+#10 fold cross validation
+fitControl <- trainControl(method = "repeatedcv", number = 10, repeats = 1)
+
+#train Random Forest Regression model with a tuneLenght = 1 (trains with 1 mtry value for RandomForest)
+system.time(rfFitBld2 <- train(Loc_UID2~., data = trainSet, method = "rf", trControl=fitControl, tuneLength = 1))
+# Run time: 22  minutes
+
+# Accuracy     Kappa 
+# 0.8487728  0.847977
+
+#training results
+rfFitBld2
+
+
+# %%%%%%%%%%%%  Predict Model 2 RF %%%%%%%%%%%% 
+
+rfPredBLD2 <- predict(rfFitBld2, newdata = testSet)
+#To see the initial row of the predicited data
+head(rfPredBLD2)
+summary(rfFitBld2)
+
+#To determine how the model prioritized each feature
+varImp(rfFitBld2) # most important -- [WAP501]
+
+rfClassesBLD2 <- predict(rfFitBld2, newdata = testSet)
+str(rfClassesBLD2)
+
+postResample(rfPredBLD2, testSet$Loc_UID2)
+# Accuracy     Kappa 
+#0.8487728  0.847977
+summary(rfPredBLD2)
+plot(rfPredBLD2)
+
+
+
+# --- Building 3 RF -- #
+
+# TTS 2 Y Value = Loc_UID2
+set.seed(123)
+trainSize<-round(nrow(Location2_Bld3)*0.8) 
+testSize<-nrow(Location2_Bld3)-trainSize
+trainSize # 7594
+testSize # 1898
+training_indices<-sample(seq_len(nrow(Location2_Bld3)),size =trainSize)
+trainSet<-Location2_Bld3[training_indices,]
+testSet<-Location2_Bld3[-training_indices,] 
+
+#10 fold cross validation
+fitControl <- trainControl(method = "repeatedcv", number = 10, repeats = 1)
+
+#train Random Forest Regression model with a tuneLenght = 1 (trains with 1 mtry value for RandomForest)
+system.time(rfFitBld3 <- train(Loc_UID2~., data = trainSet, method = "rf", trControl=fitControl, tuneLength = 1))
+# Run time:  minutes
+
+# Accuracy     Kappa 
+
+
+#training results
+rfFitBld3
+
+# %%%%%%%%%%%%  Predict Model 3 RF %%%%%%%%%%%% 
+
+rfPredBLD3 <- predict(rfFitBld3, newdata = testSet)
+#To see the initial row of the predicited data
+head(rfPredBLD3)
+summary(rfFitBld3)
+
+#To determine how the model prioritized each feature
+varImp(rfFitBld3) # most important -- [WAP501]
+
+rfClassesBLD3 <- predict(rfFitBld3, newdata = testSet)
+str(rfClassesBLD3)
+
+postResample(rfPredBLD3, testSet$Loc_UID2)
+# Accuracy     Kappa 
+
+summary(rfPredBLD3)
+plot(rfPredBLD3)
