@@ -382,10 +382,10 @@ varImp(c5FitBld1) # most important -- [WAP501]
 c5ClassesBLD1 <- predict(c5FitBld1, newdata = testSet)
 str(c5ClassesBLD1)
 
-postResample(rfPredBLD1, testSet$Loc_UID2)
+postResample(c5PredBLD1, testSet$Loc_UID2)
 # Accuracy     Kappa 
 #0.7704762 0.7694471 
-summary(rfPredBLD1)
+summary(c5PredBLD1)
 plot(c5PredBLD1)
 
 
@@ -472,7 +472,7 @@ summary(c5FitBld3)
 varImp(c5FitBld3) # most important -- [WAP501]
 
 c5ClassesBLD3 <- predict(c5FitBld3, newdata = testSet)
-str(rfClassesBLD3)
+str(c5ClassesBLD3)
 
 postResample(c5PredBLD3, testSet$Loc_UID2)
 # Accuracy     Kappa 
@@ -666,7 +666,3 @@ postResample(knnPredBLD3, testSet$Loc_UID2)
 
 summary(knnPredBLD3)
 plot(knnPredBLD3)
-
-
-
-
