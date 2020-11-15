@@ -133,7 +133,7 @@ testSet<-FEdata2[-training_indices,]
 #10 fold cross validation
 fitControl <- trainControl(method = "repeatedcv", number = 10, repeats = 1)
 
-#train Random Forest Regression model with a tuneLenght = 1 (trains with 1 mtry value for RandomForest)
+#train 
 system.time(rfFitBuild <- train(Loc_UID2~., data = trainSet, method = "rf", trControl=fitControl, tuneLength = 1))
 # Run time 2.7 hours
 
@@ -175,7 +175,7 @@ testSet<-Location2_Bld1[-training_indices,]
 #10 fold cross validation
 fitControl <- trainControl(method = "repeatedcv", number = 10, repeats = 1)
 
-#train Random Forest Regression model with a tuneLenght = 1 (trains with 1 mtry value for RandomForest)
+#train
 system.time(rfFitBld1 <- train(Loc_UID2~., data = trainSet, method = "rf", trControl=fitControl, tuneLength = 1))
 # Run time: 17 minutes
 
@@ -221,7 +221,7 @@ testSet<-Location2_Bld2[-training_indices,]
 #10 fold cross validation
 fitControl <- trainControl(method = "repeatedcv", number = 10, repeats = 1)
 
-#train Random Forest Regression model with a tuneLenght = 1 (trains with 1 mtry value for RandomForest)
+#train 
 system.time(rfFitBld2 <- train(Loc_UID2~., data = trainSet, method = "rf", trControl=fitControl, tuneLength = 1))
 # Run time: 22  minutes
 
@@ -267,7 +267,7 @@ testSet<-Location2_Bld3[-training_indices,]
 #10 fold cross validation
 fitControl <- trainControl(method = "repeatedcv", number = 10, repeats = 1)
 
-#train Random Forest Regression model with a tuneLenght = 1 (trains with 1 mtry value for RandomForest)
+#train 
 system.time(rfFitBld3 <- train(Loc_UID2~., data = trainSet, method = "rf", trControl=fitControl, tuneLength = 1))
 # Run time: 45 minutes
 
@@ -313,7 +313,7 @@ testSet<-FEdata2[-training_indices,]
 #10 fold cross validation
 fitControl <- trainControl(method = "repeatedcv", number = 10, repeats = 1)
 
-#train Random Forest Regression model with a tuneLenght = 1 (trains with 1 mtry value for RandomForest)
+#train 
 system.time(c5FitBuild <- train(Loc_UID2~., data = trainSet, method = "C5.0", trControl=fitControl, tuneLength = 1))
 # Run time  15 minutes
 
@@ -358,7 +358,7 @@ testSet<-Location2_Bld1[-training_indices,]
 #10 fold cross validation
 fitControl <- trainControl(method = "repeatedcv", number = 10, repeats = 1)
 
-#train Random Forest Regression model with a tuneLenght = 1 (trains with 1 mtry value for RandomForest)
+#train
 system.time(c5FitBld1 <- train(Loc_UID2~., data = trainSet, method = "C5.0", trControl=fitControl, tuneLength = 1))
 # Run time: 2 minutes
 
@@ -404,7 +404,7 @@ testSet<-Location2_Bld2[-training_indices,]
 #10 fold cross validation
 fitControl <- trainControl(method = "repeatedcv", number = 10, repeats = 1)
 
-#train Random Forest Regression model with a tuneLenght = 1 (trains with 1 mtry value for RandomForest)
+#train
 system.time(c5FitBld2 <- train(Loc_UID2~., data = trainSet, method = "C5.0", trControl=fitControl, tuneLength = 1))
 # Run time:  2 minutes
 
@@ -451,7 +451,7 @@ testSet<-Location2_Bld3[-training_indices,]
 #10 fold cross validation
 fitControl <- trainControl(method = "repeatedcv", number = 10, repeats = 1)
 
-#train Random Forest Regression model with a tuneLenght = 1 (trains with 1 mtry value for RandomForest)
+#train
 system.time(c5FitBld3 <- train(Loc_UID2~., data = trainSet, method = "C5.0", trControl=fitControl, tuneLength = 1))
 # Run time: 5 minutes
 
@@ -500,8 +500,9 @@ testSet<-FEdata2[-training_indices,]
 #10 fold cross validation
 fitControl <- trainControl(method = "repeatedcv", number = 10, repeats = 1)
 
-#train Random Forest Regression model with a tuneLenght = 1 (trains with 1 mtry value for RandomForest)
-system.time(knnFitBuild <- train(Loc_UID2~., data = trainSet, method = "knn", trControl = train_control)
+#train
+system.time(knnFitBuild <- train(Loc_UID2~., data = trainSet, method = "knn"))
+
 # Run time   minutes
 
 # Accuracy     Kappa 
@@ -545,8 +546,8 @@ testSet<-Location2_Bld1[-training_indices,]
 #10 fold cross validation
 fitControl <- trainControl(method = "repeatedcv", number = 10, repeats = 1)
 
-#train Random Forest Regression model with a tuneLenght = 1 (trains with 1 mtry value for RandomForest)
-system.time(knnFitBld1 <- train(Loc_UID2~., data = trainSet, method = "knn", trControl = train_control)
+#train
+system.time(knnFitBld1 <- train(Loc_UID2~., data = trainSet, method = "knn"))
 # Run time:  minutes
 
 # Accuracy     Kappa 
@@ -591,7 +592,7 @@ testSet<-Location2_Bld2[-training_indices,]
 #10 fold cross validation
 fitControl <- trainControl(method = "repeatedcv", number = 10, repeats = 1)
 
-#train Random Forest Regression model with a tuneLenght = 1 (trains with 1 mtry value for RandomForest)
+#train 
 system.time(knnFitBld2 <- train(Loc_UID2~., data = trainSet, method = "knn", trControl = train_control)
 # Run time:   minutes
 
@@ -638,18 +639,18 @@ testSet<-Location2_Bld3[-training_indices,]
 #10 fold cross validation
 fitControl <- trainControl(method = "repeatedcv", number = 10, repeats = 1)
 
-#train Random Forest Regression model with a tuneLenght = 1 (trains with 1 mtry value for RandomForest)
+#train 
 system.time(knnFitBld3 <- train(Loc_UID2~., data = trainSet, method = "knn", trControl = train_control)
 # Run time:  minutes
-
+            
 # Accuracy     Kappa 
-
-
+            
+            
 #training results
 knnFitBld3
-
+            
 # %%%%%%%%%%%%  Predict Model 3 knn %%%%%%%%%%%% 
-
+            
 knnPredBLD3 <- predict(knnFitBld3, newdata = testSet)
 #To see the initial row of the predicited data
 head(knnPredBLD3)
@@ -666,3 +667,4 @@ postResample(knnPredBLD3, testSet$Loc_UID2)
 
 summary(knnPredBLD3)
 plot(knnPredBLD3)
+          
