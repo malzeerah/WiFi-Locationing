@@ -593,11 +593,11 @@ testSet<-Location2_Bld2[-training_indices,]
 fitControl <- trainControl(method = "repeatedcv", number = 10, repeats = 1)
 
 #train
-system.time(knnFitBld1 <- train(Loc_UID2~., data = trainSet, method = "knn"))
-# Run time:   minutes
+system.time(knnFitBld2 <- train(Loc_UID2~., data = trainSet, method = "knn"))
+# Run time: 5 minutes
 
 # Accuracy     Kappa 
-
+#0.5574969  0.5552950
 
 #training results
 knnFitBld2
@@ -618,7 +618,7 @@ str(knnClassesBLD2)
 
 postResample(knnPredBLD2, testSet$Loc_UID2)
 # Accuracy     Kappa 
-
+#0.6679500 0.6661445 
 
 summary(knnPredBLD2)
 plot(knnPredBLD2)
@@ -640,7 +640,7 @@ testSet<-Location2_Bld3[-training_indices,]
 fitControl <- trainControl(method = "repeatedcv", number = 10, repeats = 1)
 
 #train 
-system.time(knnFitBld1 <- train(Loc_UID2~., data = trainSet, method = "knn"))
+system.time(knnFitBld3 <- train(Loc_UID2~., data = trainSet, method = "knn"))
 # Run time:  minutes
             
 # Accuracy     Kappa 
