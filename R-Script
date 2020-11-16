@@ -1,5 +1,3 @@
-## THE FOLLOWING IS A WORK IN PROGRESS ## 
-
 ########################
 ## Load Packages & Data ## 
 ########################
@@ -86,7 +84,7 @@ Location2_Bld1 = subset(Location2_Bld1, select = -c(BUILDINGID,SPACEID,RELATIVEP
 Location2_Bld2 = subset(Location2_Bld2, select = -c(BUILDINGID,SPACEID,RELATIVEPOSITION,USERID,PHONEID,TIMESTAMP) )
 Location2_Bld3 = subset(Location2_Bld3, select = -c(BUILDINGID,SPACEID,RELATIVEPOSITION,USERID,PHONEID,TIMESTAMP) )
 
-# -- Building 1 --#
+# -- Remove attribute with 0 variance from Building 1 -- #
 # Identify columns with no variance using nearZeroVar()  
 nzvMetrics <- nearZeroVar(Location2_Bld1, saveMetrics = TRUE)
 nzvMetrics
@@ -94,7 +92,7 @@ nzvMetrics
 # remove columns with no variance using nearZeroVar()  
 Location2_Bld1 = subset(Location2_Bld1, select = -c(WAP200, WAP203, WAP204, WAP206, WAP208, WAP209, WAP213, WAP214, WAP216, WAP218, WAP219, WAP220, WAP222, WAP223, WAP228, WAP229, WAP230, WAP231, WAP232, WAP233, WAP234, WAP235, WAP236, WAP237, WAP242, WAP243, WAP244, WAP245, WAP246, WAP247, WAP249, WAP250, WAP254, WAP255, WAP256, WAP257, WAP258, WAP259, WAP260, WAP261, WAP262, WAP263, WAP274, WAP277, WAP278, WAP279, WAP282, WAP284, WAP286, WAP288, WAP293, WAP295, WAP296, WAP301, WAP303, WAP304, WAP307, WAP310, WAP311, WAP312, WAP313, WAP314, WAP315, WAP316, WAP317, WAP318, WAP329, WAP332, WAP333, WAP334, WAP335, WAP338, WAP340, WAP342) )
 
-# -- Building 2 --#
+# -- Remove attribute with 0 variance from Building 2 -- #
 # Identify columns with no variance using nearZeroVar()  
 nzvMetrics <- nearZeroVar(Location2_Bld2, saveMetrics = TRUE)
 nzvMetrics
@@ -102,7 +100,7 @@ nzvMetrics
 # remove columns with no variance using nearZeroVar()  
 Location2_Bld2 = subset(Location2_Bld2, select = -c(WAP001,WAP002,WAP005,WAP007,WAP009,WAP013,WAP014,WAP018,WAP019,WAP020,WAP025,WAP026,WAP031,WAP032,WAP033,WAP034,WAP039,WAP040,WAP041,WAP042,WAP047,WAP048,WAP053,WAP054,WAP057,WAP058,WAP060,WAP061,WAP062,WAP063,WAP064,WAP065,WAP066,WAP067,WAP068,WAP070,WAP071,WAP072,WAP073,WAP074,WAP075,WAP076,WAP079,WAP080,WAP081,WAP087,WAP096,WAP097,WAP098,WAP099,WAP100,WAP117,WAP118,WAP128,WAP138,WAP139) )
 
-# -- Building 3 --#
+# -- Remove attribute with 0 variance from Building 3 -- #
 # Identify columns with no variance using nearZeroVar()  
 nzvMetrics <- nearZeroVar(Location2_Bld3, saveMetrics = TRUE)
 nzvMetrics
@@ -132,7 +130,7 @@ trainSet<-FEdata2[training_indices,]
 testSet<-FEdata2[-training_indices,] 
 
 # 5 fold cross validation
-fitControl <- trainControl(method = "repeatedcv", number = 5, repeats = 1)
+fitControl <- trainControl(method = "repeatedcv", number = 10, repeats = 1)
 
 # configure train algo
 system.time(rfFitBuild <- train(Loc_UID2~., data = trainSet, method = "rf", trControl=fitControl, tuneLength = 1))
@@ -173,7 +171,7 @@ testSize # 1050
 training_indices<-sample(seq_len(nrow(Location2_Bld1)),size =trainSize)
 trainSet<-Location2_Bld1[training_indices,]
 testSet<-Location2_Bld1[-training_indices,] 
-fitControl <- trainControl(method = "repeatedcv", number = 5, repeats = 1)
+fitControl <- trainControl(method = "repeatedcv", number = 10, repeats = 1)
 system.time(rfFitBld1 <- train(Loc_UID2~., data = trainSet, method = "rf", trControl=fitControl, tuneLength = 1))
 # Run time: 17 minutes
 rfFitBld1
@@ -185,7 +183,7 @@ rfFitBld1
 rfPredBLD1 <- predict(rfFitBld1, newdata = testSet)
 head(rfPredBLD1)
 summary(rfFitBld1)
-varImp(rfFitBld1) # most important -- 
+varImp(rfFitBld1) # most important -- [WAP051]
 rfClassesBLD1 <- predict(rfFitBld1, newdata = testSet)
 str(rfClassesBLD1)
 postResample(rfPredBLD1, testSet$Loc_UID2)
@@ -205,7 +203,7 @@ testSize # 1039
 training_indices<-sample(seq_len(nrow(Location2_Bld2)),size =trainSize)
 trainSet<-Location2_Bld2[training_indices,]
 testSet<-Location2_Bld2[-training_indices,] 
-fitControl <- trainControl(method = "repeatedcv", number = 5, repeats = 1)
+fitControl <- trainControl(method = "repeatedcv", number = 10, repeats = 1)
 system.time(rfFitBld2 <- train(Loc_UID2~., data = trainSet, method = "rf", trControl=fitControl, tuneLength = 1))
 # Run time: 22  minutes
 rfFitBld2
@@ -237,7 +235,7 @@ testSize # 1898
 training_indices<-sample(seq_len(nrow(Location2_Bld3)),size =trainSize)
 trainSet<-Location2_Bld3[training_indices,]
 testSet<-Location2_Bld3[-training_indices,] 
-fitControl <- trainControl(method = "repeatedcv", number = 5, repeats = 1)
+fitControl <- trainControl(method = "repeatedcv", number = 10, repeats = 1)
 system.time(rfFitBld3 <- train(Loc_UID2~., data = trainSet, method = "rf", trControl=fitControl, tuneLength = 1))
 # Run time: 45 minutes
 rfFitBld3
@@ -273,7 +271,7 @@ testSize # 5981
 training_indices<-sample(seq_len(nrow(FEdata2)),size =trainSize)
 trainSet<-FEdata2[training_indices,]
 testSet<-FEdata2[-training_indices,] 
-fitControl <- trainControl(method = "repeatedcv", number = 5, repeats = 1)
+fitControl <- trainControl(method = "repeatedcv", number = 10, repeats = 1)
 system.time(c5FitBuild <- train(Loc_UID2~., data = trainSet, method = "C5.0", trControl=fitControl, tuneLength = 1))
 # Run time  15 minutes
 c5FitBuild
@@ -304,7 +302,7 @@ testSize # 1050
 training_indices<-sample(seq_len(nrow(Location2_Bld1)),size =trainSize)
 trainSet<-Location2_Bld1[training_indices,]
 testSet<-Location2_Bld1[-training_indices,] 
-fitControl <- trainControl(method = "repeatedcv", number = 5, repeats = 1)
+fitControl <- trainControl(method = "repeatedcv", number = 10, repeats = 1)
 system.time(c5FitBld1 <- train(Loc_UID2~., data = trainSet, method = "C5.0", trControl=fitControl, tuneLength = 1))
 # Run time: 2 minutes
 c5FitBld1
@@ -335,7 +333,7 @@ testSize # 1039
 training_indices<-sample(seq_len(nrow(Location2_Bld2)),size =trainSize)
 trainSet<-Location2_Bld2[training_indices,]
 testSet<-Location2_Bld2[-training_indices,] 
-fitControl <- trainControl(method = "repeatedcv", number = 5, repeats = 1)
+fitControl <- trainControl(method = "repeatedcv", number = 10, repeats = 1)
 system.time(c5FitBld2 <- train(Loc_UID2~., data = trainSet, method = "C5.0", trControl=fitControl, tuneLength = 1))
 # Run time:  2 minutes
 c5FitBld2
@@ -367,7 +365,7 @@ testSize # 1898
 training_indices<-sample(seq_len(nrow(Location2_Bld3)),size =trainSize)
 trainSet<-Location2_Bld3[training_indices,]
 testSet<-Location2_Bld3[-training_indices,] 
-fitControl <- trainControl(method = "repeatedcv", number = 5, repeats = 1)
+fitControl <- trainControl(method = "repeatedcv", number = 10, repeats = 1)
 system.time(c5FitBld3 <- train(Loc_UID2~., data = trainSet, method = "C5.0", trControl=fitControl, tuneLength = 1))
 # Run time: 5 minutes
 c5FitBld3
@@ -405,7 +403,7 @@ testSize # 5981
 training_indices<-sample(seq_len(nrow(FEdata2)),size =trainSize)
 trainSet<-FEdata2[training_indices,]
 testSet<-FEdata2[-training_indices,] 
-fitControl <- trainControl(method = "repeatedcv", number = 5, repeats = 1)
+fitControl <- trainControl(method = "repeatedcv", number = 10, repeats = 1)
 system.time(knnFitBuild <- train(Loc_UID2~., data = trainSet, method = "knn"))
 # Run time 48 minutes
 knnFitBuild
@@ -436,7 +434,7 @@ testSize # 1050
 training_indices<-sample(seq_len(nrow(Location2_Bld1)),size =trainSize)
 trainSet<-Location2_Bld1[training_indices,]
 testSet<-Location2_Bld1[-training_indices,] 
-fitControl <- trainControl(method = "repeatedcv", number = 5, repeats = 1)
+fitControl <- trainControl(method = "repeatedcv", number = 10, repeats = 1)
 system.time(knnFitBld1 <- train(Loc_UID2~., data = trainSet, method = "knn"))
 # Run time: 6  minutes
 knnFitBld1
@@ -467,7 +465,7 @@ testSize # 1039
 training_indices<-sample(seq_len(nrow(Location2_Bld2)),size =trainSize)
 trainSet<-Location2_Bld2[training_indices,]
 testSet<-Location2_Bld2[-training_indices,] 
-fitControl <- trainControl(method = "repeatedcv", number = 5, repeats = 1)
+fitControl <- trainControl(method = "repeatedcv", number = 10, repeats = 1)
 system.time(knnFitBld2 <- train(Loc_UID2~., data = trainSet, method = "knn"))
 # Run time: 5 minutes
 knnFitBld2
@@ -499,7 +497,7 @@ testSize # 1898
 training_indices<-sample(seq_len(nrow(Location2_Bld3)),size =trainSize)
 trainSet<-Location2_Bld3[training_indices,]
 testSet<-Location2_Bld3[-training_indices,] 
-fitControl <- trainControl(method = "repeatedcv", number = 5, repeats = 1) 
+fitControl <- trainControl(method = "repeatedcv", number = 10, repeats = 1) 
 system.time(knnFitBld3 <- train(Loc_UID2~., data = trainSet, method = "knn"))
 # Run time: 17 minutes
 knnFitBld3
