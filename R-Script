@@ -1,8 +1,8 @@
 ## THE FOLLOWING IS A WORK IN PROGRESS ## 
 
-####################
-## Load Packages ## 
-####################
+########################
+## Load Packages & Data ## 
+########################
 library(readr)
 library(caret)
 library(C50)
@@ -15,6 +15,9 @@ library(ggplot2)
 ## Import data
 RAWdata <- read.csv("trainingData.csv")
 
+########################
+## parallel processing ## 
+########################
 
 # Find how many cores are on your machine
 detectCores() # Result = 4
@@ -24,9 +27,8 @@ cl <- makeCluster(2)
 registerDoParallel(cl)
 # Confirm how many cores are now "assigned" to R and RStudio
 getDoParWorkers() # Result 2 
-# Stop Cluster. After performing your tasks, stop your cluster. 
+# Stop Cluster. After peorming your tasks, stop your cluster. 
 #stopCluster(cl)
-
 
 ####################
 ## Pre-processing ## 
@@ -34,6 +36,7 @@ getDoParWorkers() # Result 2
 
 # Verify data type
 str(RAWdata) #19937 observations
+# Verify data type first 9 rows
 str(RAWdata[,1:9])
 summary(RAWdata[,1:9]) 
 
@@ -60,35 +63,7 @@ FEdata.BLD1 <- RAWdata[RAWdata$BUILDINGID == 0, ]
 FEdata.BLD2 <- RAWdata[RAWdata$BUILDINGID == 1, ]
 FEdata.BLD3 <- RAWdata[RAWdata$BUILDINGID == 2, ]
 
-
-## ----- option 1 ----- ##
-## Loc_UID contains 735 levels
-
-# Combine BUILDINGID, FLOOR, SPACEID 
-FEdata <- unite(RAWdata, "Loc_UID", remove = TRUE, sep = ".", c("BUILDINGID","FLOOR", "SPACEID"))
-Location1_Bld1 <- unite(FEdata.BLD1, "Loc_UID", remove = TRUE, sep = ".", c("BUILDINGID","FLOOR", "SPACEID"))
-Location1_Bld2 <- unite(FEdata.BLD2, "Loc_UID", remove = TRUE, sep = ".", c("BUILDINGID","FLOOR", "SPACEID"))
-Location1_Bld3 <- unite(FEdata.BLD3, "Loc_UID", remove = TRUE, sep = ".", c("BUILDINGID","FLOOR", "SPACEID"))
-
-# Convert Loc_UID to factor 
-FEdata$Loc_UID <- as.factor(FEdata$Loc_UID)
-Location1_Bld1$Loc_UID <- as.factor(Location1_Bld1$Loc_UID)
-Location1_Bld2$Loc_UID <- as.factor(Location1_Bld2$Loc_UID)
-Location1_Bld3$Loc_UID <- as.factor(Location1_Bld3$Loc_UID)
-
-# verify UID data type
-str(FEdata[,1:9])
-
-
-# Remove unneccasry columns
-FEdata = subset(FEdata, select = -c(LONGITUDE,LATITUDE,RELATIVEPOSITION,USERID,PHONEID,TIMESTAMP) )
-Location1_Bld1 = subset(Location1_Bld1, select = -c(LONGITUDE,LATITUDE,RELATIVEPOSITION,USERID,PHONEID,TIMESTAMP) )
-Location1_Bld2 = subset(Location1_Bld2, select = -c(LONGITUDE,LATITUDE,RELATIVEPOSITION,USERID,PHONEID,TIMESTAMP) )
-Location1_Bld3 = subset(Location1_Bld3, select = -c(LONGITUDE,LATITUDE,RELATIVEPOSITION,USERID,PHONEID,TIMESTAMP) )
-
-
-## ----- option 2  ----- ##
-## Loc_UID2 contains 933 levels
+## Loc_UID2 = LONGITUDE, LATITUDE, FLOOR producing 933 levels
 
 # Combine LONGITUDE, LATITUDE, Floor 
 FEdata2 <- unite(RAWdata, "Loc_UID2", remove = TRUE, sep = ".", c("LONGITUDE","LATITUDE", "FLOOR"))
@@ -105,24 +80,50 @@ Location2_Bld3$Loc_UID2 <- as.factor(Location2_Bld3$Loc_UID2)
 # verify data type
 str(FEdata2[,1:9])
 
-# Remove unneccasry columns
+# Remove extra columns
 FEdata2 = subset(FEdata2, select = -c(BUILDINGID,SPACEID,RELATIVEPOSITION,USERID,PHONEID,TIMESTAMP) )
 Location2_Bld1 = subset(Location2_Bld1, select = -c(BUILDINGID,SPACEID,RELATIVEPOSITION,USERID,PHONEID,TIMESTAMP) )
 Location2_Bld2 = subset(Location2_Bld2, select = -c(BUILDINGID,SPACEID,RELATIVEPOSITION,USERID,PHONEID,TIMESTAMP) )
 Location2_Bld3 = subset(Location2_Bld3, select = -c(BUILDINGID,SPACEID,RELATIVEPOSITION,USERID,PHONEID,TIMESTAMP) )
 
+# -- Building 1 --#
+# Identify columns with no variance using nearZeroVar()  
+nzvMetrics <- nearZeroVar(Location2_Bld1, saveMetrics = TRUE)
+nzvMetrics
 
-## option 2 [Loc_UID2] has more levels (more precision) and we will use it instead of option 1. 
+# remove columns with no variance using nearZeroVar()  
+Location2_Bld1 = subset(Location2_Bld1, select = -c(WAP200, WAP203, WAP204, WAP206, WAP208, WAP209, WAP213, WAP214, WAP216, WAP218, WAP219, WAP220, WAP222, WAP223, WAP228, WAP229, WAP230, WAP231, WAP232, WAP233, WAP234, WAP235, WAP236, WAP237, WAP242, WAP243, WAP244, WAP245, WAP246, WAP247, WAP249, WAP250, WAP254, WAP255, WAP256, WAP257, WAP258, WAP259, WAP260, WAP261, WAP262, WAP263, WAP274, WAP277, WAP278, WAP279, WAP282, WAP284, WAP286, WAP288, WAP293, WAP295, WAP296, WAP301, WAP303, WAP304, WAP307, WAP310, WAP311, WAP312, WAP313, WAP314, WAP315, WAP316, WAP317, WAP318, WAP329, WAP332, WAP333, WAP334, WAP335, WAP338, WAP340, WAP342) )
 
-###############
-## Modeling ## 
-###############
+# -- Building 2 --#
+# Identify columns with no variance using nearZeroVar()  
+nzvMetrics <- nearZeroVar(Location2_Bld2, saveMetrics = TRUE)
+nzvMetrics
 
-# --- All 3 building RF -- #
+# remove columns with no variance using nearZeroVar()  
+Location2_Bld2 = subset(Location2_Bld2, select = -c(WAP001,WAP002,WAP005,WAP007,WAP009,WAP013,WAP014,WAP018,WAP019,WAP020,WAP025,WAP026,WAP031,WAP032,WAP033,WAP034,WAP039,WAP040,WAP041,WAP042,WAP047,WAP048,WAP053,WAP054,WAP057,WAP058,WAP060,WAP061,WAP062,WAP063,WAP064,WAP065,WAP066,WAP067,WAP068,WAP070,WAP071,WAP072,WAP073,WAP074,WAP075,WAP076,WAP079,WAP080,WAP081,WAP087,WAP096,WAP097,WAP098,WAP099,WAP100,WAP117,WAP118,WAP128,WAP138,WAP139) )
 
-# TTS 1 Y Value = Loc_UID2
+# -- Building 3 --#
+# Identify columns with no variance using nearZeroVar()  
+nzvMetrics <- nearZeroVar(Location2_Bld3, saveMetrics = TRUE)
+nzvMetrics
+
+# remove columns with no variance using nearZeroVar()  
+Location2_Bld3 = subset(Location2_Bld3, select = -c(WAP001,WAP002,WAP007,WAP008,WAP009,WAP010,WAP013,WAP014,WAP015,WAP016,WAP017,WAP019,WAP020,WAP021,WAP022,WAP023,WAP024,WAP025,WAP026,WAP027,WAP028,WAP029,WAP030,WAP031,WAP032,WAP033,WAP034,WAP035,WAP036,WAP037,WAP038,WAP039,WAP040,WAP041,WAP042,WAP043,WAP044,WAP045,WAP046,WAP047,WAP048,WAP049,WAP050,WAP051,WAP052,WAP053,WAP054,WAP055,WAP056,WAP057,WAP058,WAP071,WAP072,WAP075,WAP076,WAP079,WAP080,WAP081,WAP086,WAP088,WAP089,WAP090,WAP091,WAP100,WAP101,WAP102,WAP103,WAP104,WAP105,WAP106,WAP119,WAP120,WAP123,WAP124,WAP125,WAP126,WAP129,WAP130,WAP133,WAP134,WAP135,WAP136,WAP137) )
+
+# review variable count
+str(Location2_Bld1) #429 variables
+str(Location2_Bld2) #447 variables
+str(Location2_Bld3) #420 variables
+
+#################
+## Modeling RF ## 
+#################
+
+# --- Model: All 3 building RF -- #
+
+# Configure Train test split 
 set.seed(123)
-trainSize<-round(nrow(FEdata2)*0.7) 
+trainSize<-round(nrow(FEdata2)*0.8) 
 testSize<-nrow(FEdata2)-trainSize
 trainSize # 13956
 testSize # 5981
@@ -130,18 +131,19 @@ training_indices<-sample(seq_len(nrow(FEdata2)),size =trainSize)
 trainSet<-FEdata2[training_indices,]
 testSet<-FEdata2[-training_indices,] 
 
-#10 fold cross validation
-fitControl <- trainControl(method = "repeatedcv", number = 10, repeats = 1)
+# 5 fold cross validation
+fitControl <- trainControl(method = "repeatedcv", number = 5, repeats = 1)
 
-#train 
+# configure train algo
 system.time(rfFitBuild <- train(Loc_UID2~., data = trainSet, method = "rf", trControl=fitControl, tuneLength = 1))
 # Run time 2.7 hours
 
 #training results
 rfFitBuild
+# Accuracy     Kappa 
 
 
-# %%%%%%%%%%%%  Predict Model 1 RF %%%%%%%%%%%% 
+# ---  Predict all 3 Buildings RF --- # 
 
 rfPred <- predict(rfFitBuild, newdata = testSet)
 #To see the initial row of the predicited data
@@ -149,7 +151,7 @@ head(rfPred)
 summary(rfFitBuild)
 
 #To determine how the model prioritized each feature
-varImp(rfFitBuild) # most important -- [WAP501]
+varImp(rfFitBuild) # most important -- 
 
 rfClasses_i <- predict(rfFitBuild, newdata = testSet)
 str(rfClasses_i)
@@ -157,12 +159,12 @@ str(rfClasses_i)
 postResample(rfPred, testSet$Loc_UID2)
 # Accuracy     Kappa 
 # 0.7965223   0.7962457
+
 summary(rfPred)
 plot(rfPred)
 
-# --- Building 1 RF -- #
+# --- Model: Building 1 RF -- #
 
-# TTS 2 Y Value = Loc_UID2
 set.seed(123)
 trainSize<-round(nrow(Location2_Bld1)*0.8) 
 testSize<-nrow(Location2_Bld1)-trainSize
@@ -171,34 +173,21 @@ testSize # 1050
 training_indices<-sample(seq_len(nrow(Location2_Bld1)),size =trainSize)
 trainSet<-Location2_Bld1[training_indices,]
 testSet<-Location2_Bld1[-training_indices,] 
-
-#10 fold cross validation
-fitControl <- trainControl(method = "repeatedcv", number = 10, repeats = 1)
-
-#train
+fitControl <- trainControl(method = "repeatedcv", number = 5, repeats = 1)
 system.time(rfFitBld1 <- train(Loc_UID2~., data = trainSet, method = "rf", trControl=fitControl, tuneLength = 1))
 # Run time: 17 minutes
-
+rfFitBld1
 # Accuracy     Kappa 
 # 0.7677928  0.7667815
 
-#training results
-rfFitBld1
-
-
-# %%%%%%%%%%%%  Predict Model RF %%%%%%%%%%%% 
+# ---  Predict Building 1 RF --- # 
 
 rfPredBLD1 <- predict(rfFitBld1, newdata = testSet)
-#To see the initial row of the predicited data
 head(rfPredBLD1)
 summary(rfFitBld1)
-
-#To determine how the model prioritized each feature
-varImp(rfFitBld1) # most important -- [WAP501]
-
+varImp(rfFitBld1) # most important -- 
 rfClassesBLD1 <- predict(rfFitBld1, newdata = testSet)
 str(rfClassesBLD1)
-
 postResample(rfPredBLD1, testSet$Loc_UID2)
 # Accuracy     Kappa 
 # 0.7704762 0.7694471 
@@ -206,9 +195,8 @@ summary(rfPredBLD1)
 plot(rfPredBLD1)
 
 
-# --- Building 2 RF -- #
+# --- Model: Building 2 RF -- #
 
-# TTS 2 Y Value = Loc_UID2
 set.seed(123)
 trainSize<-round(nrow(Location2_Bld2)*0.8) 
 testSize<-nrow(Location2_Bld2)-trainSize
@@ -217,34 +205,21 @@ testSize # 1039
 training_indices<-sample(seq_len(nrow(Location2_Bld2)),size =trainSize)
 trainSet<-Location2_Bld2[training_indices,]
 testSet<-Location2_Bld2[-training_indices,] 
-
-#10 fold cross validation
-fitControl <- trainControl(method = "repeatedcv", number = 10, repeats = 1)
-
-#train 
+fitControl <- trainControl(method = "repeatedcv", number = 5, repeats = 1)
 system.time(rfFitBld2 <- train(Loc_UID2~., data = trainSet, method = "rf", trControl=fitControl, tuneLength = 1))
 # Run time: 22  minutes
-
-# Accuracy     Kappa 
-# 0.8487728  0.847977
-
-#training results
 rfFitBld2
+# Accuracy     Kappa 
+#0.8487728  0.847977
 
-
-# %%%%%%%%%%%%  Predict Model 2 RF %%%%%%%%%%%% 
+# ---  Predict Building 2 RF --- # 
 
 rfPredBLD2 <- predict(rfFitBld2, newdata = testSet)
-#To see the initial row of the predicited data
 head(rfPredBLD2)
 summary(rfFitBld2)
-
-#To determine how the model prioritized each feature
-varImp(rfFitBld2) # most important -- [WAP501]
-
+varImp(rfFitBld2) # most important -- 
 rfClassesBLD2 <- predict(rfFitBld2, newdata = testSet)
 str(rfClassesBLD2)
-
 postResample(rfPredBLD2, testSet$Loc_UID2)
 # Accuracy     Kappa 
 #0.8487728  0.847977
@@ -252,9 +227,8 @@ summary(rfPredBLD2)
 plot(rfPredBLD2)
 
 
-# --- Building 3 RF -- #
+# --- Model: Building 3 RF -- #
 
-# TTS 2 Y Value = Loc_UID2
 set.seed(123)
 trainSize<-round(nrow(Location2_Bld3)*0.8) 
 testSize<-nrow(Location2_Bld3)-trainSize
@@ -263,33 +237,21 @@ testSize # 1898
 training_indices<-sample(seq_len(nrow(Location2_Bld3)),size =trainSize)
 trainSet<-Location2_Bld3[training_indices,]
 testSet<-Location2_Bld3[-training_indices,] 
-
-#10 fold cross validation
-fitControl <- trainControl(method = "repeatedcv", number = 10, repeats = 1)
-
-#train 
+fitControl <- trainControl(method = "repeatedcv", number = 5, repeats = 1)
 system.time(rfFitBld3 <- train(Loc_UID2~., data = trainSet, method = "rf", trControl=fitControl, tuneLength = 1))
 # Run time: 45 minutes
-
+rfFitBld3
 # Accuracy     Kappa 
 # 0.8142142  0.8136415
 
-#training results
-rfFitBld3
-
-# %%%%%%%%%%%%  Predict Model 3 RF %%%%%%%%%%%% 
+# ---  Predict: Building 3 RF --- # 
 
 rfPredBLD3 <- predict(rfFitBld3, newdata = testSet)
-#To see the initial row of the predicited data
 head(rfPredBLD3)
 summary(rfFitBld3)
-
-#To determine how the model prioritized each feature
-varImp(rfFitBld3) # most important -- [WAP501]
-
+varImp(rfFitBld3) # most important -- 
 rfClassesBLD3 <- predict(rfFitBld3, newdata = testSet)
 str(rfClassesBLD3)
-
 postResample(rfPredBLD3, testSet$Loc_UID2)
 # Accuracy     Kappa 
 # 0.8113804 0.8107842 
@@ -297,55 +259,43 @@ summary(rfPredBLD3)
 plot(rfPredBLD3)
 
 #-----------------------------------------------------------------
+#################
+## Modeling C5 ## 
+#################
 
-# --- All 3 building c5 -- #
+# --- Model: All 3 Buildings C5 -- #
 
-# TTS 1 Y Value = Loc_UID2
 set.seed(123)
-trainSize<-round(nrow(FEdata2)*0.7) 
+trainSize<-round(nrow(FEdata2)*0.8) 
 testSize<-nrow(FEdata2)-trainSize
 trainSize # 13956
 testSize # 5981
 training_indices<-sample(seq_len(nrow(FEdata2)),size =trainSize)
 trainSet<-FEdata2[training_indices,]
 testSet<-FEdata2[-training_indices,] 
-
-#10 fold cross validation
-fitControl <- trainControl(method = "repeatedcv", number = 10, repeats = 1)
-
-#train 
+fitControl <- trainControl(method = "repeatedcv", number = 5, repeats = 1)
 system.time(c5FitBuild <- train(Loc_UID2~., data = trainSet, method = "C5.0", trControl=fitControl, tuneLength = 1))
 # Run time  15 minutes
-
+c5FitBuild
 # Accuracy     Kappa 
 #0.5845119  0.5839530
 
-#training results
-c5FitBuild
-
-
-# %%%%%%%%%%%%  Predict Model 1 c5 %%%%%%%%%%%% 
+# ---  Predict: All 3 Buildings C5 --- # 
 
 c5Pred <- predict(c5FitBuild, newdata = testSet)
-#To see the initial row of the predicited data
 head(c5Pred)
 summary(c5FitBuild)
-
-#To determine how the model prioritized each feature
-varImp(c5FitBuild) # most important -- [WAP501]
-
-rfClasses_i <- predict(c5FitBuild, newdata = testSet)
+varImp(c5FitBuild) # most important -- 
+c5Classes_i <- predict(c5FitBuild, newdata = testSet)
 str(c5Classes_i)
-
 postResample(c5Pred, testSet$Loc_UID2)
 # Accuracy     Kappa 
 #0.5895335 0.5889930 
 summary(c5Pred)
 plot(c5Pred)
 
-# --- Building 1 C5.0 -- #
+# --- Model: Building 1 C5 -- #
 
-# TTS 2 Y Value = Loc_UID2
 set.seed(123)
 trainSize<-round(nrow(Location2_Bld1)*0.8) 
 testSize<-nrow(Location2_Bld1)-trainSize
@@ -354,44 +304,29 @@ testSize # 1050
 training_indices<-sample(seq_len(nrow(Location2_Bld1)),size =trainSize)
 trainSet<-Location2_Bld1[training_indices,]
 testSet<-Location2_Bld1[-training_indices,] 
-
-#10 fold cross validation
-fitControl <- trainControl(method = "repeatedcv", number = 10, repeats = 1)
-
-#train
+fitControl <- trainControl(method = "repeatedcv", number = 5, repeats = 1)
 system.time(c5FitBld1 <- train(Loc_UID2~., data = trainSet, method = "C5.0", trControl=fitControl, tuneLength = 1))
 # Run time: 2 minutes
-
+c5FitBld1
 # Accuracy     Kappa 
 #0.5780753  0.5762808
 
-#training results
-c5FitBld1
-
-
-# %%%%%%%%%%%%  Predict Model c5 %%%%%%%%%%%% 
+# ---  Predict: Building 1 C5 --- # 
 
 c5PredBLD1 <- predict(c5FitBld1, newdata = testSet)
-#To see the initial row of the predicited data
 head(c5PredBLD1)
 summary(c5FitBld1)
-
-#To determine how the model prioritized each feature
-varImp(c5FitBld1) # most important -- [WAP501]
-
+varImp(c5FitBld1) # most important -- 
 c5ClassesBLD1 <- predict(c5FitBld1, newdata = testSet)
 str(c5ClassesBLD1)
-
 postResample(c5PredBLD1, testSet$Loc_UID2)
 # Accuracy     Kappa 
-#0.7704762 0.7694471 
+#0.5733333 0.5715055 
 summary(c5PredBLD1)
 plot(c5PredBLD1)
 
+# --- Model: Building 2 C5 -- #
 
-# --- Building 2 c5 -- #
-
-# TTS 2 Y Value = Loc_UID2
 set.seed(123)
 trainSize<-round(nrow(Location2_Bld2)*0.8) 
 testSize<-nrow(Location2_Bld2)-trainSize
@@ -400,45 +335,30 @@ testSize # 1039
 training_indices<-sample(seq_len(nrow(Location2_Bld2)),size =trainSize)
 trainSet<-Location2_Bld2[training_indices,]
 testSet<-Location2_Bld2[-training_indices,] 
-
-#10 fold cross validation
-fitControl <- trainControl(method = "repeatedcv", number = 10, repeats = 1)
-
-#train
+fitControl <- trainControl(method = "repeatedcv", number = 5, repeats = 1)
 system.time(c5FitBld2 <- train(Loc_UID2~., data = trainSet, method = "C5.0", trControl=fitControl, tuneLength = 1))
 # Run time:  2 minutes
-
+c5FitBld2
 # Accuracy     Kappa 
 #0.6892071  0.6875879
 
-#training results
-c5FitBld2
-
-
-# %%%%%%%%%%%%  Predict Model 2 c5 %%%%%%%%%%%% 
+# ---  Predict: Building 2 C5 --- # 
 
 c5PredBLD2 <- predict(c5FitBld2, newdata = testSet)
-#To see the initial row of the predicited data
 head(c5PredBLD2)
 summary(c5FitBld2)
-
-#To determine how the model prioritized each feature
-varImp(c5FitBld2) # most important -- [WAP501]
-
+varImp(c5FitBld2) # most important -- 
 c5ClassesBLD2 <- predict(c5FitBld2, newdata = testSet)
 str(c5ClassesBLD2)
-
 postResample(c5PredBLD2, testSet$Loc_UID2)
 # Accuracy     Kappa 
 #0.7054860 0.7038425 
-
 summary(c5PredBLD2)
 plot(c5PredBLD2)
 
 
-# --- Building 3 c5 -- #
+# --- Model: Building 3 C5 -- #
 
-# TTS 2 Y Value = Loc_UID2
 set.seed(123)
 trainSize<-round(nrow(Location2_Bld3)*0.8) 
 testSize<-nrow(Location2_Bld3)-trainSize
@@ -447,33 +367,21 @@ testSize # 1898
 training_indices<-sample(seq_len(nrow(Location2_Bld3)),size =trainSize)
 trainSet<-Location2_Bld3[training_indices,]
 testSet<-Location2_Bld3[-training_indices,] 
-
-#10 fold cross validation
-fitControl <- trainControl(method = "repeatedcv", number = 10, repeats = 1)
-
-#train
+fitControl <- trainControl(method = "repeatedcv", number = 5, repeats = 1)
 system.time(c5FitBld3 <- train(Loc_UID2~., data = trainSet, method = "C5.0", trControl=fitControl, tuneLength = 1))
 # Run time: 5 minutes
-
+c5FitBld3
 # Accuracy     Kappa 
 #0.5753771  0.5740953
 
-#training results
-c5FitBld3
-
-# %%%%%%%%%%%%  Predict Model 3 c5 %%%%%%%%%%%% 
+# ---  Predict: Building 3 C5 --- # 
 
 c5PredBLD3 <- predict(c5FitBld3, newdata = testSet)
-#To see the initial row of the predicited data
 head(c5PredBLD3)
 summary(c5FitBld3)
-
-#To determine how the model prioritized each feature
-varImp(c5FitBld3) # most important -- [WAP501]
-
+varImp(c5FitBld3) # most important -- 
 c5ClassesBLD3 <- predict(c5FitBld3, newdata = testSet)
 str(c5ClassesBLD3)
-
 postResample(c5PredBLD3, testSet$Loc_UID2)
 # Accuracy     Kappa 
 #0.5648051 0.5634856 
@@ -481,59 +389,45 @@ summary(c5PredBLD3)
 plot(c5PredBLD3)
 
 
-
-
 #-----------------------------------------------------------------
 
-# --- All 3 building KNN -- #
+##################
+## Modeling KNN ## 
+##################
 
-# TTS 1 Y Value = Loc_UID2
+# --- Model: All 3 Buildings KNN -- #
+
 set.seed(123)
-trainSize<-round(nrow(FEdata2)*0.7) 
+trainSize<-round(nrow(FEdata2)*0.8) 
 testSize<-nrow(FEdata2)-trainSize
 trainSize # 13956
 testSize # 5981
 training_indices<-sample(seq_len(nrow(FEdata2)),size =trainSize)
 trainSet<-FEdata2[training_indices,]
 testSet<-FEdata2[-training_indices,] 
-
-#10 fold cross validation
-fitControl <- trainControl(method = "repeatedcv", number = 10, repeats = 1)
-
-#train
+fitControl <- trainControl(method = "repeatedcv", number = 5, repeats = 1)
 system.time(knnFitBuild <- train(Loc_UID2~., data = trainSet, method = "knn"))
-
-# Run time   minutes
-
-# Accuracy     Kappa 
-
-
-#training results
+# Run time 48 minutes
 knnFitBuild
+# Accuracy     Kappa 
+# 0.4928898  0.4922288
 
-
-# %%%%%%%%%%%%  Predict Model 1 knn %%%%%%%%%%%% 
+# ---  Predict: All 3 Buildings KNN -- #
 
 knnPred <- predict(knnFitBuild, newdata = testSet)
-#To see the initial row of the predicited data
 head(knnPred)
 summary(knnFitBuild)
-
-#To determine how the model prioritized each feature
-varImp(knnFitBuild) # most important -- [WAP501]
-
-rfClasses_i <- predict(knnFitBuild, newdata = testSet)
+varImp(knnFitBuild) # most important -- 
+Classes_i <- predict(knnFitBuild, newdata = testSet)
 str(knnClasses_i)
-
 postResample(knnPred, testSet$Loc_UID2)
 # Accuracy     Kappa 
-
+#0.5917071 0.5911681 
 summary(knnPred)
 plot(knnPred)
 
-# --- Building 1 knn --- #
+# --- Model: Building 1 KNN -- #
 
-# TTS 2 Y Value = Loc_UID2
 set.seed(123)
 trainSize<-round(nrow(Location2_Bld1)*0.8) 
 testSize<-nrow(Location2_Bld1)-trainSize
@@ -542,44 +436,29 @@ testSize # 1050
 training_indices<-sample(seq_len(nrow(Location2_Bld1)),size =trainSize)
 trainSet<-Location2_Bld1[training_indices,]
 testSet<-Location2_Bld1[-training_indices,] 
-
-#10 fold cross validation
-fitControl <- trainControl(method = "repeatedcv", number = 10, repeats = 1)
-
-#train
+fitControl <- trainControl(method = "repeatedcv", number = 5, repeats = 1)
 system.time(knnFitBld1 <- train(Loc_UID2~., data = trainSet, method = "knn"))
 # Run time: 6  minutes
-
+knnFitBld1
 # Accuracy     Kappa 
 #0.4777012  0.4755206
 
-#training results
-knnFitBld1
-
-
-# %%%%%%%%%%%%  Predict Model knn %%%%%%%%%%%% 
+# ---  Predict: Building 1 KNN -- #
 
 knnPredBLD1 <- predict(knnFitBld1, newdata = testSet)
-#To see the initial row of the predicited data
 head(knnPredBLD1)
 summary(knnFitBld1)
-
-#To determine how the model prioritized each feature
-varImp(knnFitBld1) # most important -- [WAP501]
-
+varImp(knnFitBld1) # most important -- 
 knnClassesBLD1 <- predict(knnFitBld1, newdata = testSet)
 str(knnClassesBLD1)
-
 postResample(knnPredBLD1, testSet$Loc_UID2)
 # Accuracy     Kappa 
 #0.5590476 0.5571618 
 summary(knnPredBLD1)
 plot(knnPredBLD1)
 
+# --- Model: Building 2 KNN -- #
 
-# --- Building 2 knn -- #
-
-# TTS 2 Y Value = Loc_UID2
 set.seed(123)
 trainSize<-round(nrow(Location2_Bld2)*0.8) 
 testSize<-nrow(Location2_Bld2)-trainSize
@@ -588,45 +467,30 @@ testSize # 1039
 training_indices<-sample(seq_len(nrow(Location2_Bld2)),size =trainSize)
 trainSet<-Location2_Bld2[training_indices,]
 testSet<-Location2_Bld2[-training_indices,] 
-
-#10 fold cross validation
-fitControl <- trainControl(method = "repeatedcv", number = 10, repeats = 1)
-
-#train
+fitControl <- trainControl(method = "repeatedcv", number = 5, repeats = 1)
 system.time(knnFitBld2 <- train(Loc_UID2~., data = trainSet, method = "knn"))
 # Run time: 5 minutes
-
+knnFitBld2
 # Accuracy     Kappa 
 #0.5574969  0.5552950
 
-#training results
-knnFitBld2
-
-
-# %%%%%%%%%%%%  Predict Model 2 knn %%%%%%%%%%%% 
+# ---  Predict: Building 2 KNN -- #
 
 knnPredBLD2 <- predict(knnFitBld2, newdata = testSet)
-#To see the initial row of the predicited data
 head(knnPredBLD2)
 summary(knnFitBld2)
-
-#To determine how the model prioritized each feature
-varImp(knnFitBld2) # most important -- [WAP501]
-
+varImp(knnFitBld2) # most important -- 
 knnClassesBLD2 <- predict(knnFitBld2, newdata = testSet)
 str(knnClassesBLD2)
-
 postResample(knnPredBLD2, testSet$Loc_UID2)
 # Accuracy     Kappa 
 #0.6679500 0.6661445 
-
 summary(knnPredBLD2)
 plot(knnPredBLD2)
 
 
-# --- Building 3 knn -- #
+# --- Model: Building 3 KNN -- #
 
-# TTS 2 Y Value = Loc_UID2
 set.seed(123)
 trainSize<-round(nrow(Location2_Bld3)*0.8) 
 testSize<-nrow(Location2_Bld3)-trainSize
@@ -635,36 +499,23 @@ testSize # 1898
 training_indices<-sample(seq_len(nrow(Location2_Bld3)),size =trainSize)
 trainSet<-Location2_Bld3[training_indices,]
 testSet<-Location2_Bld3[-training_indices,] 
-
-#10 fold cross validation
-fitControl <- trainControl(method = "repeatedcv", number = 10, repeats = 1)
-
-#train 
+fitControl <- trainControl(method = "repeatedcv", number = 5, repeats = 1) 
 system.time(knnFitBld3 <- train(Loc_UID2~., data = trainSet, method = "knn"))
 # Run time: 17 minutes
-            
+knnFitBld3
 # Accuracy     Kappa 
 #0.5239142  0.5224957           
-            
-#training results
-knnFitBld3
-            
-# %%%%%%%%%%%%  Predict Model 3 knn %%%%%%%%%%%% 
-            
+
+# ---  Predict: Building 3 KNN -- #
+
 knnPredBLD3 <- predict(knnFitBld3, newdata = testSet)
-#To see the initial row of the predicited data
 head(knnPredBLD3)
 summary(knnFitBld3)
-
-#To determine how the model prioritized each feature
-varImp(knnFitBld3) # most important -- [WAP501]
-
+varImp(knnFitBld3) # most important -- 
 knnClassesBLD3 <- predict(knnFitBld3, newdata = testSet)
 str(knnClassesBLD3)
-
 postResample(knnPredBLD3, testSet$Loc_UID2)
 # Accuracy     Kappa 
 #0.6138040 0.6126061 
 summary(knnPredBLD3)
 plot(knnPredBLD3)
-          
