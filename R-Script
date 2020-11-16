@@ -548,16 +548,16 @@ fitControl <- trainControl(method = "repeatedcv", number = 10, repeats = 1)
 
 #train
 system.time(knnFitBld1 <- train(Loc_UID2~., data = trainSet, method = "knn"))
-# Run time:  minutes
+# Run time: 6  minutes
 
 # Accuracy     Kappa 
-
+#0.4777012  0.4755206
 
 #training results
 knnFitBld1
 
 
-# %%%%%%%%%%%%  Predict Model c5 %%%%%%%%%%%% 
+# %%%%%%%%%%%%  Predict Model knn %%%%%%%%%%%% 
 
 knnPredBLD1 <- predict(knnFitBld1, newdata = testSet)
 #To see the initial row of the predicited data
@@ -572,7 +572,7 @@ str(knnClassesBLD1)
 
 postResample(knnPredBLD1, testSet$Loc_UID2)
 # Accuracy     Kappa 
-
+#0.5590476 0.5571618 
 summary(knnPredBLD1)
 plot(knnPredBLD1)
 
@@ -592,8 +592,8 @@ testSet<-Location2_Bld2[-training_indices,]
 #10 fold cross validation
 fitControl <- trainControl(method = "repeatedcv", number = 10, repeats = 1)
 
-#train 
-system.time(knnFitBld2 <- train(Loc_UID2~., data = trainSet, method = "knn", trControl = train_control)
+#train
+system.time(knnFitBld1 <- train(Loc_UID2~., data = trainSet, method = "knn"))
 # Run time:   minutes
 
 # Accuracy     Kappa 
@@ -603,7 +603,7 @@ system.time(knnFitBld2 <- train(Loc_UID2~., data = trainSet, method = "knn", trC
 knnFitBld2
 
 
-# %%%%%%%%%%%%  Predict Model 2 c5 %%%%%%%%%%%% 
+# %%%%%%%%%%%%  Predict Model 2 knn %%%%%%%%%%%% 
 
 knnPredBLD2 <- predict(knnFitBld2, newdata = testSet)
 #To see the initial row of the predicited data
@@ -640,7 +640,7 @@ testSet<-Location2_Bld3[-training_indices,]
 fitControl <- trainControl(method = "repeatedcv", number = 10, repeats = 1)
 
 #train 
-system.time(knnFitBld3 <- train(Loc_UID2~., data = trainSet, method = "knn", trControl = train_control)
+system.time(knnFitBld1 <- train(Loc_UID2~., data = trainSet, method = "knn"))
 # Run time:  minutes
             
 # Accuracy     Kappa 
