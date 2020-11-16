@@ -641,10 +641,10 @@ fitControl <- trainControl(method = "repeatedcv", number = 10, repeats = 1)
 
 #train 
 system.time(knnFitBld3 <- train(Loc_UID2~., data = trainSet, method = "knn"))
-# Run time:  minutes
+# Run time: 17 minutes
             
 # Accuracy     Kappa 
-            
+#0.5239142  0.5224957           
             
 #training results
 knnFitBld3
@@ -664,7 +664,7 @@ str(knnClassesBLD3)
 
 postResample(knnPredBLD3, testSet$Loc_UID2)
 # Accuracy     Kappa 
-
+#0.6138040 0.6126061 
 summary(knnPredBLD3)
 plot(knnPredBLD3)
           
