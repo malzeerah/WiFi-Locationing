@@ -36,7 +36,7 @@ The dataset was comprised of the following attributes:
 <br>
 Random Forest was the superior model and produced the best results across the board. My recommendation is to maintain the RF models for the individual buildings because the precision was better for building 2 & 3 and the training times are more manageable. 
 
-<br> 
+<br> <br>
 Best Model By Building
 <br>
 
