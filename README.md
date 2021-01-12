@@ -1,4 +1,5 @@
 # WiFi-Locationing
+R | RStudio | Classification
 ## Project Overview 
 Using wireless access point signals, investigate the feasibility of using "wi-fi fingerprinting" to determine a person's location in indoor spaces
 <br>
