@@ -45,4 +45,4 @@ Best Model By Building
 | 1        |RF        | .770     | .769   |17 minutes    |
 | 2        |RF        | .848     | .847   |22 minutes    |
 | 3        |RF        | .811     | .810   |45 minutes    |
-| Comnbined|RF        | .796     | .796   |2.7 hours     |
+| Combined |RF        | .796     | .796   |2.7 hours     |
