@@ -1,6 +1,6 @@
 # WiFi-Locationing
 ## Project Overview 
-Our objective is to Using wireless access point signals, investigate the feasibility of using "wi-fi fingerprinting" to determine a person's location in indoor spaces
+Using wireless access point signals, investigate the feasibility of using "wi-fi fingerprinting" to determine a person's location in indoor spaces
 <br>
 ## Code & Resources
 
@@ -36,4 +36,12 @@ The dataset was comprised of the following attributes:
 <br>
 Random Forest was the superior model and produced the best results across the board. My recommendation is to maintain the RF models for the individual buildings because the precision was better for building 2 & 3 and the training times are more manageable. 
 
-
+<br>
+Best Model By Building
+<br>
+|Building  | Model    |Accuracy |  Kappa | Training Time |
+|----------|:--------:|--------:|--------:---------------:
+| 1        |RF        | .770     | .769    |259            |
+| 2        |RF        | .848     | .847    |265            |
+| 3        |RF        | .811     | .810    |45 minutes     |
+| Comnbined|RF        | .796     | .796    |2.7 hours      |
