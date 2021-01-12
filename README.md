@@ -39,9 +39,10 @@ Random Forest was the superior model and produced the best results across the bo
 <br> 
 Best Model By Building
 <br>
-|Building  | Model    |Accuracy |  Kappa | Training Time |
-|----------|:--------:|--------:|--------:---------------:
-| 1        |RF        | .770     | .769    |17 minutes    |
-| 2        |RF        | .848     | .847    |22 minutes    |
-| 3        |RF        | .811     | .810    |45 minutes    |
-| Comnbined|RF        | .796     | .796    |2.7 hours     |
+
+|Building  | Model    |Accuracy |  Kappa | Training Time  |
+|----------|:--------:|--------:|--------:|---------------:
+| 1        |RF        | .770     | .769   |17 minutes    |
+| 2        |RF        | .848     | .847   |22 minutes    |
+| 3        |RF        | .811     | .810   |45 minutes    |
+| Comnbined|RF        | .796     | .796   |2.7 hours     |
